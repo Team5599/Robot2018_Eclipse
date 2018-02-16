@@ -1,11 +1,15 @@
 package org.usfirst.frc.team5599.robot;
 
-import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SampleRobot;
+
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Spark;
-import edu.wpi.first.wpilibj.Timer;
+
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+
+import edu.wpi.first.wpilibj.Timer;
  
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
@@ -27,6 +31,9 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
     Spark rightFrontWheel;
     Spark leftRearWheel;
     Spark rightRearWheel;
+    
+    SpeedControllerGroup driveTrainLeft;
+    SpeedControllerGroup driveTrainRight;
 
     Spark intakeMotorLeft;
 	Spark intakeMotorRight;
@@ -38,11 +45,10 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 	DoubleSolenoid intakeSolenoid2;
 	DoubleSolenoid shootingSolenoid3;
 	DoubleSolenoid openingSolenoid4;
-	// DoubleSolenoid climbingSolenoid5;
 
 	Compressor compressor;
 
-	RobotDrive myRobot;
+	DifferentialDrive myRobot;
  
 	 public Robot() {
  
@@ -50,7 +56,6 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 		driveStickLeft = new JoystickController(1);                                                                                                                    
 		operatorController = new XBoxController(2);
 
-		
 		rightFrontWheel = new Spark(4);
 
 		rightRearWheel = new Spark(1);
@@ -59,7 +64,10 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 		
 		leftRearWheel = new Spark(2);
 		
-		myRobot = new RobotDrive(leftFrontWheel, leftRearWheel, rightFrontWheel, rightRearWheel);
+		driveTrainLeft = new SpeedControllerGroup(leftFrontWheel, leftRearWheel);
+		driveTrainRight = new SpeedControllerGroup(rightFrontWheel, leftFrontWheel);
+		
+		myRobot = new DifferentialDrive(driveTrainLeft, driveTrainRight);
 		
 		intakeMotorLeft = new Spark(5);
 		
@@ -73,9 +81,7 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 		intakeSolenoid2 = new DoubleSolenoid(2,3);
 		shootingSolenoid3 = new DoubleSolenoid(4,5);
 		openingSolenoid4 = new DoubleSolenoid(6,7);
-		// climbingSolenoid5 = new DoubleSolenoid(8,9);
-		
-		
+	
 		
 	}
 
@@ -122,80 +128,7 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 		}
 	}
 
- /*
-        ========================================================================================================
-                                Autonomous Code
-        ========================================================================================================
-    */
 
-	public void autonomous() {
-
-		String gameData = DriverStation.getInstance().getGameSpecificMessage();
-
-		if (gameData.charAt(0) == 'L') {
-			
-			for (int count = 0; count <= 30; count++) {
-				leftFrontWheel.set(1.0); 
-				rightFrontWheel.set(0.5);
-				leftRearWheel.set(1.0);
-				rightRearWheel.set(0.0);
-				Timer.delay(0.1);
-		 	}
-
-			for (int count = 0; count <= 300; count++) {
-				leftFrontWheel.set(1.0); 
-				rightFrontWheel.set(1.0);
-				leftRearWheel.set(1.0);
-				rightRearWheel.set(1.0);
-				Timer.delay(0.1);
-			}
-
-			for (int count = 0; count <= 300; count++) {
-				leftFrontWheel.set(0.0); 
-				rightFrontWheel.set(0.0);
-				leftRearWheel.set(0.0);
-				rightRearWheel.set(0.0);	
-				Timer.delay(0.1);
-			}
-
-			for (int count = 0; count <= 30; count++) {
-				leftFrontWheel.set(1.0); 
-				rightFrontWheel.set(0.5);
-				leftRearWheel.set(1.0);
-				rightRearWheel.set(0.0);		
-				Timer.delay(.1);
-			}
-
-
- 			for (int count = 0; count <= 300; count++) {
-				leftFrontWheel.set(-1.0); 
-				rightFrontWheel.set(-1.0);
-				leftRearWheel.set(-1.0);
-				rightRearWheel.set(-1.0);
-				Timer.delay(.1);
-			}
-
-			for (int count = 0; count <= 300; count++) {
-				leftFrontWheel.set(0.0); 
-				rightFrontWheel.set(0.0);
-				leftRearWheel.set(0.0);
-				rightRearWheel.set(0.0);
-				Timer.delay(.1);
-			 }
-
-			}
-
-			else {
-
-			for (int count = 0; count <= 30; count++) {
-				leftFrontWheel.set(1.0); 
-				rightFrontWheel.set(1.0);
-				leftRearWheel.set(1.0);
-				rightRearWheel.set(1.0);
-				Timer.delay(.1);
-			}
-	 	}
-	}
 
 	//Disabling Code
 
