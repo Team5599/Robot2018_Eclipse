@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
  
@@ -39,7 +38,7 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 	DoubleSolenoid intakeSolenoid2;
 	DoubleSolenoid shootingSolenoid3;
 	DoubleSolenoid openingSolenoid4;
-	DoubleSolenoid climbingSolenoid5;
+	// DoubleSolenoid climbingSolenoid5;
 
 	Compressor compressor;
 
@@ -52,19 +51,19 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 		operatorController = new XBoxController(2);
 
 		
-		rightFrontWheel = new Spark(0);
+		rightFrontWheel = new Spark(4);
 
 		rightRearWheel = new Spark(1);
 		
-		leftFrontWheel = new Spark(2);
+		leftFrontWheel = new Spark(3);
 		
-		leftRearWheel = new Spark(3);
+		leftRearWheel = new Spark(2);
 		
 		myRobot = new RobotDrive(leftFrontWheel, leftRearWheel, rightFrontWheel, rightRearWheel);
 		
-		intakeMotorLeft = new Spark(4);
+		intakeMotorLeft = new Spark(5);
 		
-		intakeMotorRight = new Spark(5);
+		intakeMotorRight = new Spark(6);
 
 		climber = new Spark(8);	
 
@@ -74,7 +73,7 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 		intakeSolenoid2 = new DoubleSolenoid(2,3);
 		shootingSolenoid3 = new DoubleSolenoid(4,5);
 		openingSolenoid4 = new DoubleSolenoid(6,7);
-		climbingSolenoid5 = new DoubleSolenoid(8,9);
+		// climbingSolenoid5 = new DoubleSolenoid(8,9);
 		
 		
 		
@@ -89,6 +88,8 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
     public void operatorControl() {
 
     	while (isEnabled() && isOperatorControl()) {
+    		
+    		System.out.println("Teleop mode!");
 			
 	        double stickRightY = driveStickRight.getJoystickY();
 	        double stickLeftY = driveStickLeft.getJoystickY();
@@ -114,10 +115,10 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 			else {
 			    intakeMotorLeft.set(0.0);
 				intakeMotorRight.set(0.0);
+			}
 							
 			Timer.delay(0.005);
-
-			}
+			
 		}
 	}
 
@@ -146,7 +147,7 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 				rightFrontWheel.set(1.0);
 				leftRearWheel.set(1.0);
 				rightRearWheel.set(1.0);
-				Timer.delay(.1);
+				Timer.delay(0.1);
 			}
 
 			for (int count = 0; count <= 300; count++) {
@@ -154,7 +155,7 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 				rightFrontWheel.set(0.0);
 				leftRearWheel.set(0.0);
 				rightRearWheel.set(0.0);	
-				Timer.delay(.1);
+				Timer.delay(0.1);
 			}
 
 			for (int count = 0; count <= 30; count++) {
@@ -204,7 +205,6 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
 		myRobot.tankDrive(0.0, 0.0);
 
-
 		leftFrontWheel.set(0.0);
 		rightFrontWheel.set(0.0);
 		leftRearWheel.set(0.0);
@@ -212,8 +212,7 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
         intakeMotorLeft.set(0.0);
 	    intakeMotorRight.set(0.0);
 
-		
-		compressor.stop();
+		// compressor.stop();
 		
 		System.out.println("The Robot has been disabled!");
 	}
