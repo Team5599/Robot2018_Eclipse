@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
  
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
@@ -49,7 +50,7 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 	Compressor compressor;
 
 	DifferentialDrive myRobot;
- 
+	
 	 public Robot() {
  
 		driveStickRight = new JoystickController(0);
@@ -75,7 +76,7 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
 		climber = new Spark(8);	
 
-		climberBase = new Spark(9);
+		climberBase = new Spark(7);
 
 		intakeSolenoid1 = new DoubleSolenoid(0,1);
 		intakeSolenoid2 = new DoubleSolenoid(2,3);
@@ -99,35 +100,147 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 			
 	        double stickRightY = driveStickRight.getJoystickY();
 	        double stickLeftY = driveStickLeft.getJoystickY();
-	 
+	        
 	        myRobot.tankDrive(stickLeftY, stickRightY);
 
-			if (operatorController.getAButton() == true) {
-				intakeMotorLeft.set(1.0);
-				intakeMotorRight.set(1.0);
-			
-			}
-			else {
-			    intakeMotorLeft.set(0.0);
-				intakeMotorRight.set(0.0);
-				
-			}
-			
-			if (operatorController.getBButton() == true) {
-				intakeMotorLeft.set(-1.0);
-				intakeMotorRight.set(-1.0);
-				
-			}
-			else {
-			    intakeMotorLeft.set(0.0);
-				intakeMotorRight.set(0.0);
-			}
+			controlIntakeMotors();
+			controlLiftArm();
 							
 			Timer.delay(0.005);
 			
 		}
 	}
+    
+    public void controlIntakeMotors() {
+    	
+    	if (operatorController.getAButton() == true) {
+    		
+			intakeMotorLeft.set(1.0);
+			intakeMotorRight.set(1.0);
+		
+		} else if (operatorController.getBButton() == true) {
+			
+			intakeMotorLeft.set(-1.0);
+			intakeMotorRight.set(-1.0);
+			
+		} else {
+			
+		    intakeMotorLeft.set(0.0);
+			intakeMotorRight.set(0.0);
+			
+		}
+		
+    }
+    
+    public void controlLiftArm() {
+    	
+    	if (operatorController.getRightBumper() == true) {
+    		
+    		climberBase.set(0.4);
+    		climber.set(0.2);
+    	} else if (operatorController.getLeftBumper() == true) {
+    		
+    		climberBase.set(-0.4);
+    		climber.set(-0.2);
+    		
+    	} else {
+    		
+    		climberBase.set(0.0);
+    		climber.set(0.0);
+    	}
+    	
+    }
+    
+    /*
+    ========================================================================================================
+                            Autonomous Code
+    ========================================================================================================
+    */
+    
+    public void autonomous() {
+    	
+		String gameData = DriverStation.getInstance().getGameSpecificMessage();
+		
+		char allianceSwitch = gameData.charAt(0);
+		char centerScale = gameData.charAt(1);
+		char opposingSwitch = gameData.charAt(2);
+		
 
+		if (allianceSwitch == 'L') {
+			
+			for (int count = 0; count <= 30; count++) {
+				leftFrontWheel.set(1.0); 
+				rightFrontWheel.set(0.5);
+				leftRearWheel.set(1.0);
+				rightRearWheel.set(0.0);
+				Timer.delay(0.1);
+		 	}
+	
+			for (int count = 0; count <= 300; count++) {
+				leftFrontWheel.set(1.0); 
+				rightFrontWheel.set(1.0);
+				leftRearWheel.set(1.0);
+				rightRearWheel.set(1.0);
+				Timer.delay(0.1);
+			}
+	
+			for (int count = 0; count <= 300; count++) {
+				leftFrontWheel.set(0.0); 
+				rightFrontWheel.set(0.0);
+				leftRearWheel.set(0.0);
+				rightRearWheel.set(0.0);	
+				Timer.delay(0.1);
+			}
+	
+			for (int count = 0; count <= 30; count++) {
+				leftFrontWheel.set(1.0); 
+				rightFrontWheel.set(0.5);
+				leftRearWheel.set(1.0);
+				rightRearWheel.set(0.0);		
+				Timer.delay(0.1);
+			}
+	
+	
+			for (int count = 0; count <= 300; count++) {
+				leftFrontWheel.set(-1.0); 
+				rightFrontWheel.set(-1.0);
+				leftRearWheel.set(-1.0);
+				rightRearWheel.set(-1.0);
+				Timer.delay(0.1);
+			}
+	
+			for (int count = 0; count <= 300; count++) {
+				leftFrontWheel.set(0.0); 
+				rightFrontWheel.set(0.0);
+				leftRearWheel.set(0.0);
+				rightRearWheel.set(0.0);
+				Timer.delay(0.1);
+			}
+	
+		} else {
+	
+			for (int count = 0; count <= 30; count++) {
+				leftFrontWheel.set(1.0); 
+				rightFrontWheel.set(1.0);
+				leftRearWheel.set(1.0);
+				rightRearWheel.set(1.0);
+				Timer.delay(0.1);
+			}
+			
+	 	}
+	}
+	
+	public void leftStart(){
+		
+	}
+	
+	public void rightStart(){
+		
+	}
+	
+	public void centerStart(){
+		
+	}
 
 
 	//Disabling Code
@@ -142,8 +255,8 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 		rightFrontWheel.set(0.0);
 		leftRearWheel.set(0.0);
 		rightRearWheel.set(0.0);  
-        intakeMotorLeft.set(0.0);
-	    intakeMotorRight.set(0.0);
+		intakeMotorLeft.set(0.0);
+		intakeMotorRight.set(0.0);
 
 		// compressor.stop();
 		
