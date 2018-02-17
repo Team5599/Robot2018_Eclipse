@@ -2,6 +2,7 @@ package org.usfirst.frc.team5599.robot;
 
 import edu.wpi.first.wpilibj.SampleRobot;
 
+import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Spark;
@@ -10,13 +11,13 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
- public class Robot extends SampleRobot {
+public class Robot extends SampleRobot {
  	 	
 	/*
         ========================================================================================================
@@ -49,9 +50,11 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
 	Compressor compressor;
 
-	DifferentialDrive myRobot;
+	RobotDrive myRobot;
 	
-	 public Robot() {
+	PowerDistributionPanel powerDistributionPanel;
+	
+	public Robot() {
  
 		driveStickRight = new JoystickController(0);
 		driveStickLeft = new JoystickController(1);                                                                                                                    
@@ -68,7 +71,9 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 		driveTrainLeft = new SpeedControllerGroup(leftFrontWheel, leftRearWheel);
 		driveTrainRight = new SpeedControllerGroup(rightFrontWheel, leftFrontWheel);
 		
-		myRobot = new DifferentialDrive(driveTrainLeft, driveTrainRight);
+		// myRobot = new RobotDrive(driveTrainLeft, driveTrainRight);
+		myRobot = new RobotDrive(leftFrontWheel, leftRearWheel, rightFrontWheel, rightRearWheel);
+		powerDistributionPanel = new PowerDistributionPanel();
 		
 		intakeMotorLeft = new Spark(5);
 		
@@ -82,11 +87,15 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 		intakeSolenoid2 = new DoubleSolenoid(2,3);
 		shootingSolenoid3 = new DoubleSolenoid(4,5);
 		openingSolenoid4 = new DoubleSolenoid(6,7);
-	
 		
+		powerDistributionPanel.clearStickyFaults();
+		
+		String[] autonomousModes = {"None", "Baseline", "Left", "Center", "Right"};
+		SmartDashboard.putStringArray("autonomous/modes", autonomousModes);
+	
 	}
 
-/*
+	 /*
         ========================================================================================================
                                 Tele-Operated Code
         ========================================================================================================
@@ -136,12 +145,12 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
     	
     	if (operatorController.getRightBumper() == true) {
     		
-    		climberBase.set(0.4);
-    		climber.set(0.2);
+    		climberBase.set(0.8);
+    		climber.set(-0.2);
     	} else if (operatorController.getLeftBumper() == true) {
     		
-    		climberBase.set(-0.4);
-    		climber.set(-0.2);
+    		climberBase.set(-0.8);
+    		climber.set(0.2);
     		
     	} else {
     		
@@ -161,11 +170,15 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
     	
 		String gameData = DriverStation.getInstance().getGameSpecificMessage();
 		
+		String selected = SmartDashboard.getString("autonomous/selected", "Error");
+		
+		System.out.println("Autonomous Mode Selected: " + selected);
+		
 		char allianceSwitch = gameData.charAt(0);
 		char centerScale = gameData.charAt(1);
 		char opposingSwitch = gameData.charAt(2);
-		
 
+		/*
 		if (allianceSwitch == 'L') {
 			
 			for (int count = 0; count <= 30; count++) {
@@ -228,6 +241,8 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 			}
 			
 	 	}
+	 	
+	 	*/
 	}
 	
 	public void leftStart(){
