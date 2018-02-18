@@ -43,9 +43,9 @@ public class Robot extends SampleRobot {
 	Spark climber;
 	Spark climberBase;
 
-	DoubleSolenoid intakeSolenoid1;
-	DoubleSolenoid intakeSolenoid2;
-	DoubleSolenoid shootingSolenoid3;
+	DoubleSolenoid intakeSolenoidLeft;
+	DoubleSolenoid intakeSolenoidRight;
+	DoubleSolenoid shootingSolenoid;
 	DoubleSolenoid openingSolenoid4;
 
 	Compressor compressor;
@@ -53,6 +53,7 @@ public class Robot extends SampleRobot {
 	RobotDrive myRobot;
 	
 	PowerDistributionPanel powerDistributionPanel;
+	ADXRS450_Gyro gyro;
 	
 	public Robot() {
  
@@ -73,26 +74,33 @@ public class Robot extends SampleRobot {
 		
 		// myRobot = new RobotDrive(driveTrainLeft, driveTrainRight);
 		myRobot = new RobotDrive(leftFrontWheel, leftRearWheel, rightFrontWheel, rightRearWheel);
-		powerDistributionPanel = new PowerDistributionPanel();
 		
 		intakeMotorLeft = new Spark(5);
-		
 		intakeMotorRight = new Spark(6);
 
 		climber = new Spark(8);	
 
 		climberBase = new Spark(7);
 
-		intakeSolenoid1 = new DoubleSolenoid(0,1);
-		intakeSolenoid2 = new DoubleSolenoid(2,3);
-		shootingSolenoid3 = new DoubleSolenoid(4,5);
+		intakeSolenoidLeft = new DoubleSolenoid(0,5);
+		intakeSolenoidRight = new DoubleSolenoid(4,3);
+		shootingSolenoid = new DoubleSolenoid(1,2);
 		openingSolenoid4 = new DoubleSolenoid(6,7);
+		
+		powerDistributionPanel = new PowerDistributionPanel();
+		gyro = new ADXRS450_Gyro();
 		
 		powerDistributionPanel.clearStickyFaults();
 		
 		String[] autonomousModes = {"None", "Baseline", "Left", "Center", "Right"};
 		SmartDashboard.putStringArray("autonomous/modes", autonomousModes);
 	
+	}
+	
+	public void updateDashboard(){
+		
+		SmartDashboard.putNumber("drive/navx/yaw", gyro.getAngle());
+		
 	}
 
 	 /*
@@ -110,10 +118,23 @@ public class Robot extends SampleRobot {
 	        double stickRightY = driveStickRight.getJoystickY();
 	        double stickLeftY = driveStickLeft.getJoystickY();
 	        
-	        myRobot.tankDrive(stickLeftY, stickRightY);
-
-			controlIntakeMotors();
+	         myRobot.tankDrive(stickLeftY, stickRightY);
+	        
+	      /*  if (Math.abs(stickLeftY) > 0.1){
+		        leftFrontWheel.set(stickLeftY);
+		        rightRearWheel.set(-stickLeftY);
+	        }
+	        
+	        if (Math.abs(stickRightY) > 0.1){
+	        leftRearWheel.set(stickRightY);
+	        rightFrontWheel.set(-stickRightY);
+	        }
+	        
+	        */
+	        controlIntakeMotors();
 			controlLiftArm();
+			controlShootingPiston();
+			controlArmPistons();
 							
 			Timer.delay(0.005);
 			
@@ -125,12 +146,12 @@ public class Robot extends SampleRobot {
     	if (operatorController.getAButton() == true) {
     		
 			intakeMotorLeft.set(1.0);
-			intakeMotorRight.set(1.0);
+			intakeMotorRight.set(-1.0);
 		
 		} else if (operatorController.getBButton() == true) {
 			
 			intakeMotorLeft.set(-1.0);
-			intakeMotorRight.set(-1.0);
+			intakeMotorRight.set(1.0);
 			
 		} else {
 			
@@ -143,14 +164,14 @@ public class Robot extends SampleRobot {
     
     public void controlLiftArm() {
     	
-    	if (operatorController.getRightBumper() == true) {
+    	if (operatorController.getRightTrigger() == true) {
     		
-    		climberBase.set(0.8);
-    		climber.set(-0.2);
-    	} else if (operatorController.getLeftBumper() == true) {
+    		climberBase.set(0.7);
+    		climber.set(-0.3);
+    	} else if (operatorController.getLeftTrigger() == true) {
     		
-    		climberBase.set(-0.8);
-    		climber.set(0.2);
+    		climberBase.set(-0.7);
+    		climber.set(0.3);
     		
     	} else {
     		
@@ -158,6 +179,34 @@ public class Robot extends SampleRobot {
     		climber.set(0.0);
     	}
     	
+    }
+    
+    public void controlShootingPiston(){
+    	
+    	if (operatorController.getXButton() == true){
+    		
+    		shootingSolenoid.set(DoubleSolenoid.Value.kForward);
+    		
+    	} else if (operatorController.getYButton() == true){
+    		
+    		shootingSolenoid.set(DoubleSolenoid.Value.kReverse);
+    		
+    	}
+    
+    }
+    
+    public void controlArmPistons(){
+    	if (operatorController.getLeftBumper() == true){
+    		
+    		intakeSolenoidLeft.set(DoubleSolenoid.Value.kForward);
+    		intakeSolenoidRight.set(DoubleSolenoid.Value.kForward);
+    		
+    	} else if (operatorController.getRightBumper() == true){
+    		
+    		intakeSolenoidLeft.set(DoubleSolenoid.Value.kReverse);
+    		intakeSolenoidRight.set(DoubleSolenoid.Value.kReverse);
+    		
+    	}
     }
     
     /*
@@ -177,6 +226,35 @@ public class Robot extends SampleRobot {
 		char allianceSwitch = gameData.charAt(0);
 		char centerScale = gameData.charAt(1);
 		char opposingSwitch = gameData.charAt(2);
+		
+		
+		myRobot.tankDrive(0.4, 0.4);
+		
+		Timer.delay(2.0);
+		
+		if (!isEnabled() || !isAutonomous()) { return; }
+		
+		myRobot.tankDrive(0.0,0.0);
+		
+		Timer.delay(0.2);
+		
+		if (!isEnabled() || !isAutonomous()) { return; }
+		
+		climberBase.set(-0.5);
+		climber.set(0.2);
+		
+		Timer.delay(2.0);
+		
+		if (!isEnabled() || !isAutonomous()) { return; }
+		
+		shootingSolenoid.set(DoubleSolenoid.Value.kForward);
+		
+		Timer.delay(0.1);
+		
+		if (!isEnabled() || !isAutonomous()) { return; }
+		
+		climberBase.set(0.0);
+		climber.set(0.0);
 
 		/*
 		if (allianceSwitch == 'L') {
