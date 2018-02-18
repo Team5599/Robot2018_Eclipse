@@ -166,12 +166,12 @@ public class Robot extends SampleRobot {
     	
     	if (operatorController.getRightTrigger() == true) {
     		
-    		climberBase.set(0.7);
-    		climber.set(-0.3);
+    		climberBase.set(0.5);
+    		climber.set(-0.25);
     	} else if (operatorController.getLeftTrigger() == true) {
     		
-    		climberBase.set(-0.7);
-    		climber.set(0.3);
+    		climberBase.set(-0.5);
+    		climber.set(0.25);
     		
     	} else {
     		
