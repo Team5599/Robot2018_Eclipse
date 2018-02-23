@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
+import edu.wpi.first.wpilibj.CameraServer;
 
 public class Robot extends SampleRobot {
  	 	
@@ -42,6 +43,7 @@ public class Robot extends SampleRobot {
 
 	Spark climber;
 	Spark climberBase;
+	Spark tension;
 
 	DoubleSolenoid intakeSolenoidLeft;
 	DoubleSolenoid intakeSolenoidRight;
@@ -49,6 +51,9 @@ public class Robot extends SampleRobot {
 	DoubleSolenoid openingSolenoid4;
 
 	Compressor compressor;
+	
+	CameraServer server;
+	
 
 	RobotDrive myRobot;
 	
@@ -81,6 +86,8 @@ public class Robot extends SampleRobot {
 		climber = new Spark(8);	
 
 		climberBase = new Spark(7);
+		
+		tension = new Spark(9); //This relies on motor 7
 
 		intakeSolenoidLeft = new DoubleSolenoid(0,5);
 		intakeSolenoidRight = new DoubleSolenoid(4,3);
@@ -89,6 +96,10 @@ public class Robot extends SampleRobot {
 		
 		powerDistributionPanel = new PowerDistributionPanel();
 		gyro = new ADXRS450_Gyro();
+		
+		// Operating the Camera
+        server = CameraServer.getInstance();
+        server.addAxisCamera("10.55.99.11");
 		
 		powerDistributionPanel.clearStickyFaults();
 		
@@ -115,8 +126,8 @@ public class Robot extends SampleRobot {
     		
     		System.out.println("Teleop mode!");
 			
-	        double stickRightY = driveStickRight.getJoystickY();
 	        double stickLeftY = driveStickLeft.getJoystickY();
+	        double stickRightY = driveStickRight.getJoystickY();
 	        
 	         myRobot.tankDrive(stickLeftY, stickRightY);
 	        
@@ -165,18 +176,22 @@ public class Robot extends SampleRobot {
     public void controlLiftArm() {
     	
     	if (operatorController.getRightTrigger() == true) {
+    		//This raises it
+    		climberBase.set(0.6);
+    		climber.set(-0.2);
+    		tension.set(0.6);
     		
-    		climberBase.set(0.5);
-    		climber.set(-0.25);
     	} else if (operatorController.getLeftTrigger() == true) {
-    		
-    		climberBase.set(-0.5);
-    		climber.set(0.25);
+    		//This lowers it
+    		climberBase.set(-0.1);
+    		climber.set(0.2);
+    		tension.set(-0.2);
     		
     	} else {
     		
     		climberBase.set(0.0);
     		climber.set(0.0);
+    		tension.set(0.0);
     	}
     	
     }
@@ -234,7 +249,7 @@ public class Robot extends SampleRobot {
 		
 		if (!isEnabled() || !isAutonomous()) { return; }
 		
-		myRobot.tankDrive(0.0,0.0);
+		myRobot.tankDrive(0.0, 0.0);
 		
 		Timer.delay(0.2);
 		
@@ -283,6 +298,24 @@ public class Robot extends SampleRobot {
 				Timer.delay(0.1);
 			}
 	
+			if (!isEnabled() || !isAutonomous()) { return; }
+			
+			climberBase.set(-0.5);
+			climber.set(0.2);
+			
+			Timer.delay(2.0);
+			
+			if (!isEnabled() || !isAutonomous()) { return; }
+			
+			shootingSolenoid.set(DoubleSolenoid.Value.kForward);
+			
+			Timer.delay(0.1);
+			
+			if (!isEnabled() || !isAutonomous()) { return; }
+			
+			climberBase.set(0.0);
+			climber.set(0.0);
+			
 			for (int count = 0; count <= 30; count++) {
 				leftFrontWheel.set(1.0); 
 				rightFrontWheel.set(0.5);
@@ -307,6 +340,11 @@ public class Robot extends SampleRobot {
 				rightRearWheel.set(0.0);
 				Timer.delay(0.1);
 			}
+
+			if (!isEnabled() || !isAutonomous()) { return; }
+			
+			myRobot.tankDrive(0.0, 0.0);
+			
 	
 		} else {
 	
@@ -319,8 +357,12 @@ public class Robot extends SampleRobot {
 			}
 			
 	 	}
-	 	
 	 	*/
+
+		if (!isEnabled() || !isAutonomous()) { return; }
+		
+		myRobot.tankDrive(0.0, 0.0);
+		
 	}
 	
 	public void leftStart(){
