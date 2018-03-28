@@ -48,7 +48,8 @@ public class Robot extends SampleRobot {
 	DoubleSolenoid intakeSolenoidLeft;
 	DoubleSolenoid intakeSolenoidRight;
 	DoubleSolenoid shootingSolenoid;
-	DoubleSolenoid openingSolenoid4;
+	//DoubleSolenoid openingSolenoid4;
+	DoubleSolenoid handPiston;
 
 	Compressor compressor;
 	
@@ -101,10 +102,11 @@ public class Robot extends SampleRobot {
 		
 		tension = new Spark(9); //This relies on motor 7
 
-		intakeSolenoidLeft = new DoubleSolenoid(0,5);
-		intakeSolenoidRight = new DoubleSolenoid(4,3);
-		shootingSolenoid = new DoubleSolenoid(1,2);
-		openingSolenoid4 = new DoubleSolenoid(6,7);
+		intakeSolenoidLeft = new DoubleSolenoid(4,5);
+		intakeSolenoidRight = new DoubleSolenoid(6,7);
+		shootingSolenoid = new DoubleSolenoid(0,1);
+		//openingSolenoid4 = new DoubleSolenoid(6,7);
+		handPiston = new DoubleSolenoid(3,2);
 		
 		powerDistributionPanel = new PowerDistributionPanel();
 		gyro = new ADXRS450_Gyro();
@@ -155,6 +157,8 @@ public class Robot extends SampleRobot {
 			dashboardTick++;
 		} else {
 			
+			
+			/*
 			SmartDashboard.putNumber("gyroAngle", gyro.getAngle());
 			SmartDashboard.putNumber("gyroRate", gyro.getRate());
 			
@@ -183,6 +187,9 @@ public class Robot extends SampleRobot {
 			SmartDashboard.putBoolean("compressor/lowPressure", compressor.getPressureSwitchValue());
 			SmartDashboard.putNumber("compressor/current", compressor.getCompressorCurrent());
 			
+			
+			*/
+			
 			dashboardTick = 0;
 			
 		}
@@ -204,23 +211,26 @@ public class Robot extends SampleRobot {
 	        double stickLeftY = driveStickLeft.getJoystickY();
 	        double stickRightY = driveStickRight.getJoystickY();
 	        
-	         myRobot.tankDrive(stickLeftY, stickRightY);
+	        myRobot.tankDrive(stickLeftY, stickRightY);
 	        
-	      /*  if (Math.abs(stickLeftY) > 0.1){
+	        /*
+	        if (Math.abs(stickLeftY) > 0.1){
 		        frontLeftWheel.set(stickLeftY);
 		        rearRightWheel.set(-stickLeftY);
 	        }
 	        
 	        if (Math.abs(stickRightY) > 0.1){
-	        rearLeftWheel.set(stickRightY);
-	        frontRightWheel.set(-stickRightY);
+		        rearLeftWheel.set(stickRightY);
+		        frontRightWheel.set(-stickRightY);
 	        }
-	        
 	        */
+	        
+	        
 	        controlIntakeMotors();
 			controlLiftArm();
 			controlShootingPiston();
-			controlArmPistons();
+			//controlArmPistons();
+			controlHandPiston();
 			
 			updateDashboard(false);
 			
@@ -235,15 +245,15 @@ public class Robot extends SampleRobot {
     		
     		System.out.println("Running Intake Motor");
     		
-			intakeMotorLeft.set(1.0);
-			intakeMotorRight.set(-1.0);
+			intakeMotorLeft.set(0.7);
+			intakeMotorRight.set(-0.7);
 		
 		} else if (operatorController.getBButton() == true) {
 			
 			System.out.println("Running Intake Motor Inverted");
 			
-			intakeMotorLeft.set(-1.0);
-			intakeMotorRight.set(1.0);
+			intakeMotorLeft.set(-0.7);
+			intakeMotorRight.set(0.7);
 			
 		} else {
 			
@@ -261,8 +271,8 @@ public class Robot extends SampleRobot {
     		System.out.println("Raising Lift Arm");
     		
     		//This raises it
-    		climberBase.set(0.6);
-    		climber.set(-0.2);
+    		climberBase.set(0.8);
+    		climber.set(0.3);
     		tension.set(0.6);
     		
     	} else if (operatorController.getLeftTrigger() == true) {
@@ -271,7 +281,7 @@ public class Robot extends SampleRobot {
     		
     		//This lowers it
     		climberBase.set(-0.1);
-    		climber.set(0.2);
+    		climber.set(-0.3);
     		tension.set(-0.2);
     		
     	} else {
@@ -289,7 +299,9 @@ public class Robot extends SampleRobot {
     		
     		System.out.println("Deploying Shooting Piston");
     		
+    		handPiston.set(DoubleSolenoid.Value.kReverse);
     		shootingSolenoid.set(DoubleSolenoid.Value.kForward);
+    		
     		
     	} else if (operatorController.getYButton() == true){
     		
@@ -301,16 +313,34 @@ public class Robot extends SampleRobot {
     
     }
     
-    public void controlArmPistons(){
+    public void controlHandPiston(){
     	
     	if (operatorController.getLeftBumper() == true){
+    		
+    		System.out.println("Deploying Hand Piston");
+    		
+    		handPiston.set(DoubleSolenoid.Value.kForward);
+    		
+    	} else if (operatorController.getRightBumper() == true){
+    		
+    		System.out.println("Retracting Hand Piston");
+    		
+    		handPiston.set(DoubleSolenoid.Value.kReverse);
+    		
+    	}
+    
+    }
+    
+    public void controlArmPistons(){
+    	
+    	if (operatorController.getDPadUp() == true){
     		
     		System.out.println("Deploying Side-Intake Pistons");
     		
     		intakeSolenoidLeft.set(DoubleSolenoid.Value.kForward);
     		intakeSolenoidRight.set(DoubleSolenoid.Value.kForward);
     		
-    	} else if (operatorController.getRightBumper() == true){
+    	} else if (operatorController.getDPadDown() == true){
     		
     		System.out.println("Retracting Side-Intake Pistons");
     		
