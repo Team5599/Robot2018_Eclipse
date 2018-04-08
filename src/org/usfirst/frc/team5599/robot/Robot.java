@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.vision.VisionThread;
@@ -53,10 +54,8 @@ public class Robot extends SampleRobot {
 	Spark cubeArmBase;
 	Spark intakeRotator;
 
-	DoubleSolenoid intakeSolenoidLeft;	
-	DoubleSolenoid intakeSolenoidRight;
-	DoubleSolenoid shootingSolenoid;
-	DoubleSolenoid openingSolenoid4;
+	DigitalInput limitSwitch;
+	//DigitalInput otherSwitch;
 
 	Compressor compressor;
 
@@ -102,6 +101,10 @@ public class Robot extends SampleRobot {
 		cubeArmFront = new Spark(7);
 		cubeArmBase = new Spark(8);
 		intakeRotator = new Spark(9);//maybe 7and 6
+		
+		limitSwitch = new DigitalInput(0);
+		//otherSwitch = new DigitalInput(1);
+		
 		//cubeArmBaseRight = new Spark();
 		
 		//climber = new Spark();
@@ -117,10 +120,6 @@ public class Robot extends SampleRobot {
 
 		rightRearWheel = new Spark(0); //7 1
 */		
-		intakeSolenoidLeft = new DoubleSolenoid(0,5);
-		intakeSolenoidRight = new DoubleSolenoid(4,3);
-		shootingSolenoid = new DoubleSolenoid(1,2);
-		openingSolenoid4 = new DoubleSolenoid(6,7);
 		
 		powerDistributionPanel = new PowerDistributionPanel();
 		gyro = new ADXRS450_Gyro();
@@ -129,12 +128,17 @@ public class Robot extends SampleRobot {
 		
 		String[] autonomousModes = {"None", "Baseline", "Left", "Center", "Right"};
 		SmartDashboard.putStringArray("autonomous/modes", autonomousModes);
-	
 	}
 	
 	public void robotInit() {
-
-		camera = CameraServer.getInstance().addAxisCamera("10.55.99.11");
+		
+		SmartDashboard.putNumber("automode", 0.0);
+		SmartDashboard.putNumber("RobotStartPosition", 0.0);
+		SmartDashboard.putString("selectedAuto", "Not Set");
+		
+		// camera = CameraServer.getInstance().addAxisCamera("10.55.99.11");
+		
+		/*
 	    camera.setResolution(IMG_WIDTH, IMG_HEIGHT);
 	    
 	    visionThread = new VisionThread(camera, new GripPipeline(), pipeline -> {
@@ -147,6 +151,8 @@ public class Robot extends SampleRobot {
 	        }
 	    });
 	    visionThread.start();
+	    
+	    */
 	    
 	}
 	
@@ -163,6 +169,7 @@ public class Robot extends SampleRobot {
    	 */
 		
 	public void operatorControl() {
+		
 
     	while (isEnabled() && isOperatorControl()) {
     		
@@ -172,31 +179,13 @@ public class Robot extends SampleRobot {
 	        double stickRightY = driverController.getRightThumbstickY();
 
 	         myRobot.tankDrive(stickLeftY, stickRightY);
-	        
-	      /*
-			
-			// Drivetrain from townsend harris for high-grip turning
-			
-	        
-	        if (Math.abs(stickLeftY) > 0.1){
-		        leftFrontWheel.set(stickLeftY);
-		        rightRearWheel.set(-stickLeftY);
-	        }
-	        
-	        if (Math.abs(stickRightY) > 0.1){
-	        leftRearWheel.set(stickRightY);
-	        rightFrontWheel.set(-stickRightY);
-	        }
-	        
-	       */
-	         
+
 	        controlIntakeMotors();
 			controlLiftArm();
 			controlIntakeRotator();
 			controlArm();
-			// controlShootingPiston();
-			// controlArmPistons();
-			
+		
+			System.out.println("Limit switch" + limitSwitch.get());
 							
 			Timer.delay(0.01);
 			
@@ -206,16 +195,16 @@ public class Robot extends SampleRobot {
     
     public void controlIntakeMotors() {
     	
-    	if (operatorController.getButtonSeven() == true) {
+    	if (operatorController.getButtonSeven() || driverController.getLeftTrigger() == true) {
     		System.out.println("AAaaaaaa");
     		
 			intakeMotorLeft.set(0.75);
 			intakeMotorRight.set(-0.75);
 		
-		} else if (operatorController.getButtonEight() == true) {
+		} else if (operatorController.getButtonEight() || driverController.getRightTrigger() == true) {
 			
-			intakeMotorLeft.set(-0.75);
-			intakeMotorRight.set(0.75);
+			intakeMotorLeft.set(-0.9);
+			intakeMotorRight.set(0.9);
 			
 		} else {
 			
@@ -231,11 +220,11 @@ public class Robot extends SampleRobot {
     	if (operatorController.getButtonNine() == true) { 
     		System.out.println("Damn");
     		
-			intakeRotator.set(0.5);
+			intakeRotator.set(0.8);
 		
 		} else if (operatorController.getButtonTen() == true) {
 			
-			intakeRotator.set(-0.5);
+			intakeRotator.set(-0.7);
 			
 		} else {
 			
@@ -266,15 +255,22 @@ public class Robot extends SampleRobot {
 		
     }
    */ 
-    public void controlLiftArm() {   //tanoy said he want one elevator motor going one way and the other going another way, and change speed together -Jeff
+    public void controlLiftArm() {  
 
     
     	
     	if (operatorController.getButtonEleven() == true) {
     		System.out.println("BOIIIIIII");
     		
-    		cubeArmBase.set(0.5);
-
+    		cubeArmBase.set(0.6);
+    		/*if (limitSwitch.get() == true) {
+    			System.out.println("Cube Arm Base is stalling");
+    			cubeArmBase.set(0.3);
+    		}
+    		else {
+    			System.out.println("Cube Arm Base is going up");
+    			cubeArmBase.set(0.7);
+    		}*/
     	} else if (operatorController.getButtonTwelve() == true) {
     		
     		cubeArmBase.set(-0.5);
@@ -286,14 +282,24 @@ public class Robot extends SampleRobot {
     	
     }
     
-public void controlArm() {   //tanoy said he want one elevator motor going one way and the other going another way, and change speed together -Jeff
+    
+    public void controlArm() {   
 
     
     	if (operatorController.getJoystickY() >= 0.1) {
     		System.out.println("Yikes!!!!");
     		
-    		cubeArmBack.set(0.7);
-    		cubeArmFront.set(0.7);
+    		if (limitSwitch.get() == true) {
+    			cubeArmBack.set(0.0);
+        		cubeArmFront.set(0.0);
+        		System.out.println("limitSwitch is stalling arm");
+    		} else {
+    			
+    			cubeArmBack.set(0.9);
+        		cubeArmFront.set(0.9);
+        		System.out.println("Arm is going up");
+    		}
+    	
 
     	} else if (operatorController.getJoystickY() <= -0.1) {
     		
@@ -308,54 +314,8 @@ public void controlArm() {   //tanoy said he want one elevator motor going one w
     	
     }
     
-    /*public void controlShootingPiston(){
-    	
-    	if (operatorController.getButton1() == true){
-    		
-    		shootingSolenoid.set(DoubleSolenoid.Value.kForward);
-    		
-    	} else if (operatorController.getButton2() == true){
-    		
-    		shootingSolenoid.set(DoubleSolenoid.Value.kReverse);
-    		
-    	}
-    	
-    	public void controlElevator() {
-    		
-    		if (operatorController.getDPadUp() == true) {
-        		
-        		cubeArmBase.set();
-        		cubeArm.set();
-        	} else if (operatorController.getDPadDown() == true) {
-        		
-        		cubeArmBase.set();
-        		cubeArm.set();
-        		
-        	} else {
-        		
-        		cubeArmBase.set(0.0);
-        		cubeArm.set(0.0);
-        	}
-    	}
     
-    }
     
-    public void controlArmPistons(){
-    	if (operatorController.getButton9() == true){
-    		
-    		intakeSolenoidLeft.set(DoubleSolenoid.Value.kForward);
-    		intakeSolenoidRight.set(DoubleSolenoid.Value.kForward);
-    		
-    	} else if (operatorController.getButton10() == true){
-    		
-    		intakeSolenoidLeft.set(DoubleSolenoid.Value.kReverse);
-    		intakeSolenoidRight.set(DoubleSolenoid.Value.kReverse);
-    		
-    	}
-
-
-    }
-    */
     /*
     ========================================================================================================
                             Autonomous Code
@@ -363,9 +323,13 @@ public void controlArm() {   //tanoy said he want one elevator motor going one w
     */
 public void auto_driveForward(double speed, double time) {
 	
-	myRobot.tankDrive(speed, speed);
-	
-	Timer.delay(time);
+	int count = 0;
+	while (isEnabled() && isAutonomous() && count < time*1000) {
+		
+		count++;
+		myRobot.tankDrive(-speed, -speed);
+		Timer.delay(0.001);
+	}
 	
 	myRobot.tankDrive(0.0, 0.0);
 	
@@ -373,18 +337,21 @@ public void auto_driveForward(double speed, double time) {
 
 public void auto_raiseArm(double speed, double time) {
 	
-	cubeArmBase.set(0.0);
-	cubeArmBack.set(speed);
-	cubeArmFront.set(speed);
+	int count = 0;
+	while (isEnabled() && isAutonomous() && count < time*1000) {
+		
+		count++;
+		intakeRotator.set(0.7);
+		Timer.delay(0.001);
+	}
 	
-	Timer.delay(time);
 	
-	cubeArmBase.set(0.0);
-	cubeArmBack.set(0.0);
-	cubeArmFront.set(0.0);
+	intakeRotator.set(0.0);
+	
 	
 }
 
+/*
 public void auto_driveForwardWhileRaisingArm(double speed, double waitTime, double armSpeed, double armRaiseTime) {
 	
 	myRobot.tankDrive(speed, speed);
@@ -403,26 +370,76 @@ public void auto_driveForwardWhileRaisingArm(double speed, double waitTime, doub
 	cubeArmFront.set(0.0);
 		
 }
+*/
 
 public void auto_deployCube() {
 	
-	intakeMotorLeft.set(-0.75);
-	intakeMotorRight.set(0.75);
+	int count = 0;
+	while (isEnabled() && isAutonomous() && count < 1000) {
+		
+		count++;
+		intakeMotorLeft.set(-0.85);
+		intakeMotorRight.set(0.85);
+		Timer.delay(0.001);
+	
+}
+	intakeMotorLeft.set(0.0);
+	intakeMotorRight.set(0.0);
 	
 }
 
-public void auto_runIntakeArms(double speed) {
+
+public void auto_rotateCube() {
 	
-	intakeMotorLeft.set(-speed);
-	intakeMotorRight.set(speed);
+	int count = 0;
+	while (isEnabled() && isAutonomous() && count < 1000) {
+		
+		count++;
+		intakeRotator.set(0.7);
+		Timer.delay(0.001);
+	
+}
+	intakeRotator.set(0.0);
+	
+}
+
+
+public void auto_runIntakeArms(double speed, double time) {
+	
+	int count = 0;
+	while (isEnabled() && isAutonomous() && count < time*1000) {
+		count++;
+		intakeMotorLeft.set(0.75);
+		intakeMotorRight.set(-0.75);
+		Timer.delay(0.001);
+	}
+	
+	intakeMotorLeft.set(0.0);
+	intakeMotorRight.set(0.0);
 	
 }
 
 public void auto_turnLeft(double speed, double time) {
 
-	myRobot.tankDrive(-speed, speed);
+	int count = 0;
+	while (isEnabled() && isAutonomous() && count < time*1000) {
+		count++;
+		myRobot.tankDrive(-speed, speed);
+		Timer.delay(0.001);
+	}
 	
-	Timer.delay(time);
+	myRobot.tankDrive(0.0, 0.0);
+	
+}
+
+public void auto_stationaryTurnLeft(double speed, double time) {
+
+	int count = 0;
+	while (isEnabled() && isAutonomous() && count < time*1000) {
+		count++;
+		myRobot.tankDrive(0.0, speed);
+		Timer.delay(0.001);
+	}
 	
 	myRobot.tankDrive(0.0, 0.0);
 	
@@ -430,11 +447,29 @@ public void auto_turnLeft(double speed, double time) {
 
 public void auto_turnRight(double speed, double time) {
 
-	myRobot.tankDrive(speed, -speed);
-	
-	Timer.delay(time);
+	int count = 0;
+	while (isEnabled() && isAutonomous() && count < time*1000) {
+		count++;
+		myRobot.tankDrive(speed, -speed);
+		Timer.delay(0.001);
+	}
 	
 	myRobot.tankDrive(0.0, 0.0);
+
+	
+}
+
+public void auto_stationaryTurnRight(double speed, double time) {
+
+	int count = 0;
+	while (isEnabled() && isAutonomous() && count < time*1000) {
+		count++;
+		myRobot.tankDrive(speed, 0.0);
+		Timer.delay(0.001);
+	}
+	
+	myRobot.tankDrive(0.0, 0.0);
+
 	
 }
 
@@ -452,14 +487,88 @@ public void auto_stop() {
 }
 
 
+/* public void visionAlignWithCube() {
+	
+	System.out.println("Cube started");
+	
+	// for (int i = 0; i < 100; i++) {
+	while (isEnabled() && isAutonomous()) {
+		double centerX;
+
+        synchronized (imgLock) {
+            centerX = this.centerX;
+        }
+        
+        System.out.println("centerX: " + centerX);
+        
+        if (centerX > (IMG_WIDTH / 2)) {
+        	System.out.println("Cube found, turning right?");
+        	
+        } else if (centerX != 0.0) {
+        	System.out.println("Cube found, turning left?");
+        	
+        }
+        
+        Timer.delay(0.05);
+        
+	}
+	
+	System.out.println("Cube Done");
     
+}
+
+	public void auto_getCube() {
+		
+		visionAlignWithCube();
+		
+	} 
+	*/
+	
+	public void auto_crossBaseline() {
+		auto_driveForward(1.0, 1.0);
+	}
 
 public void autonomous() {
 	
-	String selected = SmartDashboard.getString("autonomous/selected", "Error");
+    System.out.println("Autonomous mode running");
+    
+	String selected = "";
 	String startPosition = "";
+	
+	Double getStart = SmartDashboard.getNumber("RobotStartPosition", 0.0);
+	
+	if (getStart == 0.0) {
+		startPosition = "Error";
+	} else if (getStart == 1.0) {
+		startPosition = "Left";
+	} else if (getStart == 2.0) {
+		startPosition = "Center";
+	} else if (getStart == 3.0) {
+		startPosition = "Right";
+	} else {
+		System.out.println("Invalid start position " + startPosition);
+		startPosition = "Left";
+	}
+	double auto = SmartDashboard.getNumber("automode", 0.0);
+	
+	if (auto == 0.0) {
+		selected = "None";
+	} else if (auto == 1.0) {
+		selected = "Baseline";
+	} else if (auto == 2.0) {
+		selected = "Switch";
+	} else if (auto == 3.0) {
+		selected = "Scale";
+	} else if (auto == 9.0) {
+		selected = "GetCube";
+	} else {
+		System.out.println("I blame ananta " + selected);
+		selected = "Baseline";
+	}
+	
+	SmartDashboard.putString("selectedAuto", selected);
+	
 	boolean cutAcrossAlliance = false;
-	String cutAcrossAlliance_Direction = "";
 	boolean placeCube = false;
 	boolean useVisionTracking = false;
 	
@@ -469,8 +578,6 @@ public void autonomous() {
 	startPosition = SmartDashboard.getString("autonomous/StartPosition", "Left");
 	cutAcrossAlliance = SmartDashboard.getBoolean("autonomous/CutAcrossAlliance", false);
 	
-	
-	cutAcrossAlliance_Direction = SmartDashboard.getString("autonomous/CutAcrossAlliance_Direction", "None");
 	placeCube = SmartDashboard.getBoolean("autonomous/PlaceCube", false);
 	useVisionTracking = SmartDashboard.getBoolean("autonomous/UseVisionTracking", false);
 	
@@ -491,7 +598,7 @@ public void autonomous() {
 		
 	} else if (selected == "Baseline") {
 		
-		auto_driveForward(1.0, 3.0);
+		auto_crossBaseline();
 		
 	} else if (selected == "Switch") {
 		
@@ -506,18 +613,15 @@ public void autonomous() {
 					
 					// Place the cube on the RIGHT switch starting from the LEFT side
 					
-					auto_driveForward(1.0, 1.0);
-					auto_turnRight(1.0, 0.5);
-					auto_driveForward(1.0, 1.0);
-					auto_raiseArm(0.7, 3.0);
-					auto_deployCube();
+					auto_driveForward(-0.5, 3.0);
+					
 					
 					
 				} else {
 					
 					System.out.println("Switch is on other side. Crossing baseline instead.");
 					
-					auto_driveForward(1.0, 3.0);
+					auto_crossBaseline();
 					
 				}
 				
@@ -527,9 +631,9 @@ public void autonomous() {
 				
 				// Place the cube on the LEFT Switch starting from the LEFT side
 				
-				auto_driveForward(1.0, 4.0);
-				auto_raiseArm(0.7, 1.0);
-				auto_deployCube();
+				auto_stationaryTurnLeft(0.3, 1.0);
+				auto_driveForward(0.4, 2.0);
+				auto_rotateCube();
 				
 			}
 			
@@ -543,16 +647,12 @@ public void autonomous() {
 					System.out.println("Switch is on other side. Cutting across alliance Left -> Right");
 					
 					// Place the cube on the LEFT switch starting from the RIGHT side
-					auto_driveForward(1.0, 4.0);
-					auto_turnLeft(0.4, 1.0);
-					auto_driveForward(0.5, 1.0);
-					auto_raiseArm(0.7, 3.0);
-					auto_deployCube();
+					auto_driveForward(-1.0, 3.0);
 					
 				} else {
 					
 					System.out.println("Switch is on other side. Crossing baseline instead.");
-					auto_driveForward(1.0, 3.0);
+					auto_crossBaseline();
 					
 				}
 				
@@ -562,7 +662,9 @@ public void autonomous() {
 				
 				// Place the cube on the RIGHT Switch starting from the RIGHT side
 				
-				auto_driveForward(1.0, 4.0);
+				auto_driveForward(-0.5, 3.0);
+				auto_turnLeft(0.2, 0.2);
+				auto_driveForward(0.2, 0.5);
 				auto_raiseArm(0.7, 1.0);
 				auto_deployCube();
 			}
@@ -575,11 +677,9 @@ public void autonomous() {
 				
 				// Place the cube on the RIGHT Switch starting from the CENTER
 				
+				auto_stationaryTurnRight(0.3, 1.0);
 				auto_driveForward(0.4, 2.0);
-				auto_turnRight(0.4, 0.3);
-				auto_driveForward(0.4, 1.0);
-				auto_raiseArm(0.7, 1.0);
-				auto_deployCube();
+				auto_rotateCube();
 				
 			} else if (allianceSwitch == 'L') {
 				
@@ -587,11 +687,9 @@ public void autonomous() {
 				
 				// Place the cube on the LEFT Switch starting from the CENTER
 				
+				auto_stationaryTurnLeft(0.3, 1.0);
 				auto_driveForward(0.4, 2.0);
-				auto_turnLeft(0.4, 0.3);
-				auto_driveForward(0.4, 1.0);
-				auto_raiseArm(0.7, 1.0);
-				auto_deployCube();
+				auto_rotateCube();
 				
 			}
 			
@@ -611,7 +709,7 @@ public void autonomous() {
 					System.out.println("Scale is on other side. Cutting across field Right -> Left");
 					
 					// Place the cube on the RIGHT scale starting from the LEFT side
-					auto_driveForward(1.0, 4.0);
+					auto_driveForward(-1.0, 3.0);
 					auto_turnRight(0.4, 1.0);
 					auto_driveForward(1.0, 1.0);
 					auto_raiseArm(0.7, 3.0);
@@ -619,7 +717,7 @@ public void autonomous() {
 				} else {
 					
 					System.out.println("Scale is on other side. Crossing baseline instead.");
-					auto_driveForward(1.0, 3.0);
+					auto_crossBaseline();
 					
 				}
 				
@@ -629,7 +727,7 @@ public void autonomous() {
 				
 				// Place the cube on the LEFT Scale starting from the LEFT side
 				
-				auto_driveForward(1.0, 5.0);
+				auto_driveForward(-1.0, 5.0);
 				auto_raiseArm(0.7, 3.0);
 				auto_deployCube();
 			}
@@ -653,7 +751,7 @@ public void autonomous() {
 				} else {
 					
 					System.out.println("Scale is on other side. Crossing baseline instead.");
-					auto_driveForward(1.0, 3.0);
+					auto_crossBaseline();
 					
 				}
 				
@@ -679,7 +777,7 @@ public void autonomous() {
 					// Place the cube on the RIGHT Scale starting from the CENTER
 					
 					auto_driveForward(0.5, 2.0);
-					auto_turnRight(0.4, 1.0);
+					auto_turnRight(0.3, 1.0);
 					auto_driveForward(1.0, 2.0);
 					auto_turnLeft(0.4, 1.0);
 					auto_driveForward(1.0, 3.0);
@@ -712,9 +810,12 @@ public void autonomous() {
 			System.out.println("Error. No Invalid Start Position: " + startPosition);
 		}
 			
+	} else if (selected == "GetCube") {
+		System.out.println("wtf why did you put 9");
 	} else {
 		System.out.println("Invalid Autonomous Mode: No code designated for '" + selected + "'");
 	}
+	
 }
 
 	//Disabling Code
