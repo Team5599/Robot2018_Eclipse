@@ -136,9 +136,9 @@ public class Robot extends SampleRobot {
 		SmartDashboard.putNumber("RobotStartPosition", 0.0);
 		SmartDashboard.putString("selectedAuto", "Not Set");
 		
-		// camera = CameraServer.getInstance().addAxisCamera("10.55.99.11");
+		/* camera = CameraServer.getInstance().addAxisCamera("10.55.99.11");
 		
-		/*
+		
 	    camera.setResolution(IMG_WIDTH, IMG_HEIGHT);
 	    
 	    visionThread = new VisionThread(camera, new GripPipeline(), pipeline -> {
@@ -152,8 +152,8 @@ public class Robot extends SampleRobot {
 	    });
 	    visionThread.start();
 	    
-	    */
 	    
+	    */
 	}
 	
 	public void updateDashboard(){
@@ -200,13 +200,21 @@ public class Robot extends SampleRobot {
     		
 			intakeMotorLeft.set(0.75);
 			intakeMotorRight.set(-0.75);
-		
+			 
+		}  else if (operatorController.getSlider() >= 0.9 && operatorController.getButtonEight() == true) { 
+			intakeMotorLeft.set(-0.5);
+			intakeMotorRight.set(0.5);
+			System.out.println("sentinels");
+			
 		} else if (operatorController.getButtonEight() || driverController.getRightTrigger() == true) {
 			
-			intakeMotorLeft.set(-0.9);
+			intakeMotorLeft.set(-0.8);
 			intakeMotorRight.set(0.9);
-			
-		} else {
+		}
+		
+		
+		
+		else {
 			
 		    intakeMotorLeft.set(0.0);
 			intakeMotorRight.set(0.0);
@@ -262,7 +270,7 @@ public class Robot extends SampleRobot {
     	if (operatorController.getButtonEleven() == true) {
     		System.out.println("BOIIIIIII");
     		
-    		cubeArmBase.set(0.6);
+    		cubeArmBase.set(0.7);
     		/*if (limitSwitch.get() == true) {
     			System.out.println("Cube Arm Base is stalling");
     			cubeArmBase.set(0.3);
@@ -273,7 +281,7 @@ public class Robot extends SampleRobot {
     		}*/
     	} else if (operatorController.getButtonTwelve() == true) {
     		
-    		cubeArmBase.set(-0.5);
+    		cubeArmBase.set(-0.6);
 
     	} else {
     		
@@ -286,7 +294,7 @@ public class Robot extends SampleRobot {
     public void controlArm() {   
 
     
-    	if (operatorController.getJoystickY() >= 0.1) {
+    	if (operatorController.getJoystickY() >= 0.3) {
     		System.out.println("Yikes!!!!");
     		
     		if (limitSwitch.get() == true) {
@@ -295,8 +303,8 @@ public class Robot extends SampleRobot {
         		System.out.println("limitSwitch is stalling arm");
     		} else {
     			
-    			cubeArmBack.set(0.9);
-        		cubeArmFront.set(0.9);
+    			cubeArmBack.set(0.8);
+        		cubeArmFront.set(0.8);
         		System.out.println("Arm is going up");
     		}
     	
@@ -335,13 +343,28 @@ public void auto_driveForward(double speed, double time) {
 	
 }
 
+public void auto_driveBackward(double speed, double time) {
+	
+	int count = 0;
+	while (isEnabled() && isAutonomous() && count < time*1000) {
+		
+		count++;
+		myRobot.tankDrive(speed, speed);
+		Timer.delay(0.001);
+	}
+	
+	myRobot.tankDrive(0.0, 0.0);
+	
+}
+
 public void auto_raiseArm(double speed, double time) {
 	
 	int count = 0;
 	while (isEnabled() && isAutonomous() && count < time*1000) {
 		
 		count++;
-		intakeRotator.set(0.7);
+		cubeArmBack.set(0.8);
+        cubeArmFront.set(0.8);
 		Timer.delay(0.001);
 	}
 	
@@ -395,7 +418,7 @@ public void auto_rotateCube() {
 	while (isEnabled() && isAutonomous() && count < 1000) {
 		
 		count++;
-		intakeRotator.set(0.7);
+		intakeRotator.set(0.6);
 		Timer.delay(0.001);
 	
 }
@@ -419,12 +442,12 @@ public void auto_runIntakeArms(double speed, double time) {
 	
 }
 
-public void auto_turnLeft(double speed, double time) {
+public void auto_turnLeft(double time) {
 
 	int count = 0;
 	while (isEnabled() && isAutonomous() && count < time*1000) {
 		count++;
-		myRobot.tankDrive(-speed, speed);
+		myRobot.tankDrive(0.2, 0.8);
 		Timer.delay(0.001);
 	}
 	
@@ -445,12 +468,40 @@ public void auto_stationaryTurnLeft(double speed, double time) {
 	
 }
 
-public void auto_turnRight(double speed, double time) {
+public void auto_turnRight(double time) {
 
 	int count = 0;
 	while (isEnabled() && isAutonomous() && count < time*1000) {
 		count++;
-		myRobot.tankDrive(speed, -speed);
+		myRobot.tankDrive(0.8, 0.2);
+		Timer.delay(0.001);
+	}
+	
+	myRobot.tankDrive(0.0, 0.0);
+
+	
+}
+
+public void auto_backTurnRight(double time) {
+
+	int count = 0;
+	while (isEnabled() && isAutonomous() && count < time*1000) {
+		count++;
+		myRobot.tankDrive(-0.8,-0.2);
+		Timer.delay(0.001);
+	}
+	
+	myRobot.tankDrive(0.0, 0.0);
+
+	
+}
+
+public void auto_backTurnLeft(double time) {
+
+	int count = 0;
+	while (isEnabled() && isAutonomous() && count < time*1000) {
+		count++;
+		myRobot.tankDrive(-0.2,-0.8);
 		Timer.delay(0.001);
 	}
 	
@@ -472,6 +523,48 @@ public void auto_stationaryTurnRight(double speed, double time) {
 
 	
 }
+
+public void auto_spinRight(double speed, double time) {
+
+	int count = 0;
+	while (isEnabled() && isAutonomous() && count < time*1000) {
+		count++;
+		myRobot.tankDrive(-0.5, 0.5);
+		Timer.delay(0.001);
+	}
+	
+	myRobot.tankDrive(0.0, 0.0);
+
+	}
+
+	public void auto_spinLeft(double speed, double time) {
+
+	int count = 0;
+	while (isEnabled() && isAutonomous() && count < time*1000) {
+		count++;
+		myRobot.tankDrive(0.5, -0.5);
+		Timer.delay(0.001);
+	}
+	
+	myRobot.tankDrive(0.0, 0.0);
+
+	}
+
+	public void auto_SwitchScore(double speed, double time) {
+		
+		int count = 0;
+		while (isEnabled() && isAutonomous() && count < time*1000) {
+			count++;
+			myRobot.tankDrive(speed, speed);
+			intakeMotorLeft.set(-speed);
+			intakeMotorRight.set(-speed);
+			intakeRotator.set(0.8);
+			Timer.delay(0.001);
+		}
+		
+		myRobot.tankDrive(0.0, 0.0);
+
+		}
 
 public void auto_stop() {
 	
@@ -547,7 +640,7 @@ public void autonomous() {
 		startPosition = "Right";
 	} else {
 		System.out.println("Invalid start position " + startPosition);
-		startPosition = "Left";
+		startPosition = "Right";
 	}
 	double auto = SmartDashboard.getNumber("automode", 0.0);
 	
@@ -575,8 +668,7 @@ public void autonomous() {
 	System.out.println("Autonomous Mode Selected: " + selected);
 	
 	// Get these values from the network table (Placed there by the driver station)
-	startPosition = SmartDashboard.getString("autonomous/StartPosition", "Left");
-	cutAcrossAlliance = SmartDashboard.getBoolean("autonomous/CutAcrossAlliance", false);
+	
 	
 	placeCube = SmartDashboard.getBoolean("autonomous/PlaceCube", false);
 	useVisionTracking = SmartDashboard.getBoolean("autonomous/UseVisionTracking", false);
@@ -586,10 +678,10 @@ public void autonomous() {
     
 	String gameData = DriverStation.getInstance().getGameSpecificMessage();
 	char allianceSwitch = gameData.charAt(0);
-	char centerScale = gameData.charAt(1);
+	char allianceScale = gameData.charAt(1);
 	char opposingSwitch = gameData.charAt(2);
 	
-	System.out.println("Switch Status [AllianceSwitch="+allianceSwitch+", CenterScale=" + centerScale + ", opposingSwitch="+opposingSwitch+"]");
+	System.out.println("Switch Status [AllianceSwitch="+allianceSwitch+", allianceScale=" + allianceScale + ", opposingSwitch="+opposingSwitch+"]");
 	
 
 	if (selected == "None") {
@@ -606,71 +698,79 @@ public void autonomous() {
 			
 			if (allianceSwitch == 'R') {
 				
-				if (cutAcrossAlliance == true) {
-					
-					
-					System.out.println("Switch is on other side. Cutting across alliance Right -> Left");
-					
-					// Place the cube on the RIGHT switch starting from the LEFT side
-					
-					auto_driveForward(-0.5, 3.0);
+				//Driving towards field edge
+				System.out.println("Switch is on right side. Driving towards field edge.");	
+				auto_stationaryTurnLeft(0.5, 0.5);
+				auto_driveForward(0.8, 1.0);
 					
 					
 					
 				} else {
 					
-					System.out.println("Switch is on other side. Crossing baseline instead.");
+					System.out.println("Switch is on left side. Crossing baseline/bumping into switch.");
 					
-					auto_crossBaseline();
-					
+					auto_driveForward(0.6, 1.5);
+					auto_driveForward(-0.3, 0.5);
+					/*auto_rotateCube();
+					auto_stationaryTurnRight(0.5, 1.0);
+					auto_driveForward(0.4, 1.0);
+					auto_runIntakeArms(0.7, 1.0);
+					auto_backTurnRight(1.5); 
+					auto_SwitchScore(0.6, 1.0);
+					*/
 				}
 				
-			} else {
-				
-				System.out.println("Placing on switch. Left -> Left");
-				
-				// Place the cube on the LEFT Switch starting from the LEFT side
-				
-				auto_stationaryTurnLeft(0.3, 1.0);
-				auto_driveForward(0.4, 2.0);
-				auto_rotateCube();
-				
-			}
+			} 
 			
 		} else if (startPosition == "Right") {
 			
-			if (allianceSwitch == 'L') {
+			if (allianceSwitch == 'R') {
 				
-				if (cutAcrossAlliance == true) {
+				
 					
 					
-					System.out.println("Switch is on other side. Cutting across alliance Left -> Right");
+					System.out.println("Switch is on the right side. Crossing baseline/bumping into switch. (pray that two cube code works)");
 					
-					// Place the cube on the LEFT switch starting from the RIGHT side
-					auto_driveForward(-1.0, 3.0);
+					// Place the cube on the Right switch starting from the RIGHT side
+					auto_driveForward(0.6, 1.5);
+					//auto_backTurnRight(1.5);
+					/*auto_driveForward(-0.3, 0.5);
+					auto_stationaryTurnLeft(0.5, 1.0);
+					auto_driveForward(0.4, 1.0);
+					auto_runIntakeArms(0.7, 1.0);
+					auto_backTurnLeft(1.5);
+					auto_SwitchScore(0.6, 1.0);
+					*/
+					
+					
+					
+					
+					
+
 					
 				} else {
 					
-					System.out.println("Switch is on other side. Crossing baseline instead.");
-					auto_crossBaseline();
+					
+					System.out.println("Switch is on left side. Driving towards field edge");
+					auto_driveForward(0.3, 2.0);
+					
+							
+					
+					/*auto_driveForward(0.4, 0.5);
+					auto_stationaryTurnRight(0.8, 0.2);
+					auto_driveForward(0.8, 0.2);
+					auto_stationaryTurnLeft(0.8, 0.2);
+					auto_driveForward(0.8, 0.5);
+					auto_stationaryTurnLeft(0.8, 0.2);
+					auto_driveForward(1.0, 2.5);
+					auto_stationaryTurnLeft(0.8, 0.5);
+					auto_driveForward(1.0, 1.0);
+					*/
 					
 				}
-				
-			} else {
-				
-				System.out.println("Placing on switch. Right -> Right");
-				
-				// Place the cube on the RIGHT Switch starting from the RIGHT side
-				
-				auto_driveForward(-0.5, 3.0);
-				auto_turnLeft(0.2, 0.2);
-				auto_driveForward(0.2, 0.5);
-				auto_raiseArm(0.7, 1.0);
-				auto_deployCube();
 			}
 			
-		} else if (startPosition == "Center") {
-			
+		else if  (startPosition == "Center") {			
 			if (allianceSwitch == 'R') {
 				
 				System.out.println("Placing on switch. Center -> Right");
@@ -697,11 +797,11 @@ public void autonomous() {
 			System.out.println("Error. No Invalid Start Position: " + startPosition);
 		}
 		
-	} else if (selected == "Scale") {
+	} /*else if (selected == "Scale") {
 		
 		if (startPosition == "Left") {
 			
-			if (centerScale == 'R') {
+			//if (allianceScale == 'R') {
 				
 				if (cutAcrossAlliance == true) {
 					
@@ -734,7 +834,7 @@ public void autonomous() {
 			
 		} else if (startPosition == "Right") {
 			
-			if (centerScale == 'L') {
+			if (allianceScale == 'L') {
 				
 				if (cutAcrossAlliance == true) {
 					
@@ -815,8 +915,9 @@ public void autonomous() {
 	} else {
 		System.out.println("Invalid Autonomous Mode: No code designated for '" + selected + "'");
 	}
-	
-}
+	*/
+
+
 
 	//Disabling Code
 
@@ -841,9 +942,3 @@ public void autonomous() {
 		System.out.println("The Robot has been disabled!");
 	}
 }
-
-
-
-
-
-
